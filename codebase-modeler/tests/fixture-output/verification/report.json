@@ -1,0 +1,148 @@
+{
+ "out_dir": "tests/fixture-output",
+ "repo": "tests/fixture-repo",
+ "generated_at": "2026-09-13T20:41:58+00:00",
+ "docs": {
+  "Specification.md": {
+   "exists": true,
+   "citations_total": 43,
+   "citations_ok": 43,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 0,
+    "types": [],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  },
+  "ClassModel.md": {
+   "exists": true,
+   "citations_total": 28,
+   "citations_ok": 28,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 1,
+    "types": [
+     "classDiagram"
+    ],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  },
+  "DatabaseModel.md": {
+   "exists": true,
+   "citations_total": 43,
+   "citations_ok": 43,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 1,
+    "types": [
+     "erDiagram"
+    ],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  },
+  "DomainModel.md": {
+   "exists": true,
+   "citations_total": 32,
+   "citations_ok": 32,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 1,
+    "types": [
+     "classDiagram"
+    ],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  },
+  "UseCaseModel.md": {
+   "exists": true,
+   "citations_total": 55,
+   "citations_ok": 55,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 1,
+    "types": [
+     "flowchart"
+    ],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  },
+  "ActivityDiagram.md": {
+   "exists": true,
+   "citations_total": 40,
+   "citations_ok": 40,
+   "citations_failed": [],
+   "sections_missing": [],
+   "mermaid": {
+    "blocks": 2,
+    "types": [
+     "flowchart",
+     "flowchart"
+    ],
+    "required_present": true,
+    "fences_balanced": true
+   },
+   "node_maps": {
+    "missing_maps": [],
+    "missing_ids": {}
+   },
+   "density_warnings": [],
+   "major_defects": [],
+   "minor_warnings": [],
+   "status": "PASS"
+  }
+ },
+ "overall": {
+  "pass": true,
+  "status": "PASS"
+ }
+}
