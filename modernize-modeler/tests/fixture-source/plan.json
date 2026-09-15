@@ -1,0 +1,15 @@
+{
+  "repo_name": "notes-app",
+  "generated_at": "2026-09-10T09:00:00Z",
+  "pinned_files": [
+    "app.py",
+    "db.py",
+    "models.py",
+    "requirements.txt",
+    "routes/auth.py",
+    "routes/notes.py",
+    "migrations/0001_init.sql"
+  ],
+  "unverified_markers": 6,
+  "notes": "Fixture output of the codebase-modeler skill; every artifact in this directory cites the pinned files above."
+}

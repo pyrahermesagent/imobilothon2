@@ -1,0 +1,162 @@
+{
+  "repo_name": "notes-app",
+  "source": {
+    "dir": "tests/fixture-source",
+    "repo_sha": "fixture",
+    "inputs_available": {"repo": true, "plan": true, "inventory": false, "evidence": false, "verification": false}
+  },
+  "directives": {
+    "raw": "keep Python; Flask -> FastAPI; SQLite -> PostgreSQL; add pytest + CI; no frontend needed",
+    "items": [
+      {"id": "D-1", "kind": "keep", "text": "keep Python", "disposition": "decision", "refs": ["M-1"]},
+      {"id": "D-2", "kind": "change", "text": "Flask -> FastAPI", "disposition": "decision", "refs": ["M-1"]},
+      {"id": "D-3", "kind": "change", "text": "SQLite -> PostgreSQL", "disposition": "decision", "refs": ["M-2", "M-3"]},
+      {"id": "D-4", "kind": "add", "text": "add pytest + CI", "disposition": "decision", "refs": ["M-5"]},
+      {"id": "D-5", "kind": "defer", "text": "no frontend needed", "disposition": "kept_unchanged", "refs": [], "reason": "source models no frontend (A-1, A-5); there is nothing to modernize"}
+    ]
+  },
+  "stack": {
+    "frontend": {"current": "none", "current_citations": ["`Specification.md:21`"],
+                 "target": "none (per D-5)", "citations": []},
+    "backend": {"current": "Python 3.12 + Flask 3.0.0", "current_citations": ["`requirements.txt:1`"],
+                "target": "Python 3.13 + FastAPI 0.115 + Pydantic 2.x", "citations": ["`requirements.txt:1`", "`app.py:7`"]},
+    "database": {"current": "SQLite via Flask-SQLAlchemy", "current_citations": ["`app.py:8-9`"],
+                 "target": "PostgreSQL 16 + SQLAlchemy 2.x (async) + Alembic", "citations": ["`migrations/0001_init.sql:1`", "`requirements.txt:2`"]},
+    "infrastructure": {"current": "none (dev server only)", "current_citations": ["`app.py:17-18`"],
+                       "target": "Docker + uvicorn workers + GitHub Actions CI", "citations": ["`app.py:18`"]}
+  },
+  "decisions": [
+    {
+      "id": "M-1",
+      "area": "tech_stack",
+      "summary": "Replace Flask with FastAPI: async endpoints, Pydantic v2 request/response models, auto OpenAPI",
+      "from": "Flask 3.0.0, manual request.get_json + jsonify, synchronous handlers",
+      "from_citations": ["`requirements.txt:1`", "`app.py:7`"],
+      "to": "FastAPI 0.115 + Pydantic v2 models; declarative 422 responses; OpenAPI at /docs",
+      "why": "user directive D-2; built-in validation removes the raw-500 error class and async fits the I/O-bound handlers",
+      "directive_refs": ["D-1", "D-2"],
+      "artifacts": ["Specification.md", "ClassModel.md", "UseCaseModel.md", "ActivityDiagram.md"]
+    },
+    {
+      "id": "M-2",
+      "area": "data_model",
+      "summary": "Move the ORM layer to SQLAlchemy 2.0 typed mapping with an async session and Alembic-managed migrations",
+      "from": "Flask-SQLAlchemy 3.1.1 with a single hand-written SQL file and no migration tooling",
+      "from_citations": ["`requirements.txt:2`", "`migrations/0001_init.sql:1`"],
+      "to": "SQLAlchemy 2.x async + Alembic; existing schema re-issued as an Alembic baseline",
+      "why": "user directive D-3; typed mapping removes string-based queries and Alembic closes the unversioned-schema gap (A-3)",
+      "directive_refs": ["D-3"],
+      "artifacts": ["Specification.md", "ClassModel.md", "DatabaseModel.md", "ActivityDiagram.md"]
+    },
+    {
+      "id": "M-3",
+      "area": "data_model",
+      "summary": "Swap the SQLite file database for PostgreSQL 16",
+      "from": "SQLite file at ./notes.db via create_engine",
+      "from_citations": ["`app.py:8-9`"],
+      "to": "PostgreSQL 16, asyncpg driver, DATABASE_URL from environment",
+      "why": "user directive D-3; PostgreSQL is the target for any multi-process deployment behind uvicorn workers",
+      "directive_refs": ["D-3"],
+      "artifacts": ["Specification.md", "DatabaseModel.md", "ActivityDiagram.md"]
+    },
+    {
+      "id": "M-4",
+      "area": "api",
+      "summary": "Introduce typed request/response schemas so invalid input yields 422 with field errors instead of 500",
+      "from": "manual get_json + dict access; KeyError on missing keys surfaces as HTTP 500",
+      "from_citations": ["`routes/notes.py:9-15`"],
+      "to": "Pydantic v2 NoteCreate/NoteRead schemas; HTTPException(400) for empty title; 422 from framework validation",
+      "why": "closes I-2 and A-4 with the standard modern idiom that ships with the M-1 framework",
+      "directive_refs": [],
+      "artifacts": ["Specification.md", "ClassModel.md", "UseCaseModel.md"]
+    },
+    {
+      "id": "M-5",
+      "area": "testing",
+      "summary": "Add a pytest + httpx AsyncClient test suite and a GitHub Actions CI workflow with a coverage gate",
+      "from": "no test suite in repo, no pytest dependency",
+      "from_citations": ["`requirements.txt:1-2`"],
+      "to": "pytest 8.x + httpx + pytest-cov (80% line-coverage gate) + .github/workflows/ci.yml running on every push",
+      "why": "user directive D-4; closes A-2 and makes the M-1/M-4 behavior changes verifiable",
+      "directive_refs": ["D-4"],
+      "artifacts": ["Specification.md"]
+    },
+    {
+      "id": "M-6",
+      "area": "deployment",
+      "summary": "Replace the debug dev-server entrypoint with uvicorn workers in a Docker image; debug never enabled in production",
+      "from": "app.run(debug=True) as the only entrypoint",
+      "from_citations": ["`app.py:18`"],
+      "to": "uvicorn[standard] with gunicorn workers in a Dockerfile; environment-driven config; no debug flag",
+      "why": "closes I-1; debug=True is unsafe outside localhost and the app needs a real serving path to run the M-3/M-5 stack",
+      "directive_refs": [],
+      "artifacts": ["Specification.md", "ActivityDiagram.md"]
+    }
+  ],
+  "kept": [
+    {"id": "K-1", "element": "User/Note entities with 1:N ownership and the two-table schema shape",
+     "citations": ["`models.py:1-29`"], "directive_ref": "D-1"},
+    {"id": "K-2", "element": "email+password login semantics (credential check, session row, token in response)",
+     "citations": ["`routes/auth.py:9-15`"], "directive_ref": "D-1"}
+  ],
+  "assumptions": [
+    {"id": "A-1", "source_doc": "Specification.md",
+     "quote": "Frontend: none in repo (UNVERIFIED - no template/SPA sources)",
+     "status": "accepted",
+     "reason": "user directive D-5 confirms no frontend; the system stays backend-only by decision"},
+    {"id": "A-2", "source_doc": "Specification.md",
+     "quote": "no test suite in repo - UNVERIFIED (no tests/, no pytest dep in requirements)",
+     "status": "resolved",
+     "resolution": "Testing Strategy rewritten around pytest + httpx AsyncClient with a CI coverage gate (M-5)",
+     "decision_refs": ["M-5"]},
+    {"id": "A-3", "source_doc": "DatabaseModel.md",
+     "quote": "schema comes from a single hand-written SQL file with no tooling (UNVERIFIED - no Alembic/Flyway config)",
+     "status": "resolved",
+     "resolution": "Alembic adopted; 0001_init.sql re-issued as the Alembic baseline revision (M-2)",
+     "decision_refs": ["M-2"]},
+    {"id": "A-4", "source_doc": "UseCaseModel.md",
+     "quote": "behavior for a malformed JSON body is UNVERIFIED (no explicit handling seen)",
+     "status": "resolved",
+     "resolution": "Pydantic v2 request models define the behavior: 422 with field-level errors (M-4)",
+     "decision_refs": ["M-4"]},
+    {"id": "A-5", "source_doc": "ClassModel.md",
+     "quote": "No frontend classes - no UI in repo (UNVERIFIED by absence search)",
+     "status": "accepted",
+     "reason": "consistent with D-5; the modernized class model intentionally has no frontend section content beyond DTOs"},
+    {"id": "A-6", "source_doc": "ActivityDiagram.md",
+     "quote": "request handling is synchronous, single-process Flask (UNVERIFIED - no async/queue code found)",
+     "status": "deferred",
+     "reason": "deep concurrency modeling is out of scope; M-6 documents the uvicorn worker model and M-1 makes handlers async, which removes the single-process bottleneck"}
+  ],
+  "issues": [
+    {"id": "I-1", "source_doc": "Specification.md",
+     "quote": "debug=True in the entrypoint is an anti-pattern for any non-local deployment",
+     "status": "resolved",
+     "resolution": "production entrypoint via uvicorn workers; debug disabled by construction (M-6)",
+     "decision_refs": ["M-6"]},
+    {"id": "I-2", "source_doc": "Specification.md",
+     "quote": "unhandled KeyError -> 500 on POST /api/notes for a missing title key",
+     "status": "resolved",
+     "resolution": "Pydantic request models turn the 500 into a 422 with field errors (M-4)",
+     "decision_refs": ["M-4"]}
+  ],
+  "artifact_scopes": {
+    "Specification.md": {"decisions": ["M-1", "M-2", "M-3", "M-4", "M-5", "M-6"],
+                         "assumptions": ["A-1", "A-2"], "issues": ["I-1", "I-2"],
+                         "kept": ["K-1", "K-2"]},
+    "ClassModel.md": {"decisions": ["M-1", "M-2", "M-4"],
+                      "assumptions": ["A-5"], "issues": ["I-2"],
+                      "kept": ["K-1"]},
+    "DatabaseModel.md": {"decisions": ["M-2", "M-3"],
+                         "assumptions": ["A-3"], "issues": [],
+                         "kept": ["K-1"]},
+    "DomainModel.md": {"decisions": [], "assumptions": [], "issues": [],
+                       "kept": ["K-1"]},
+    "UseCaseModel.md": {"decisions": ["M-1", "M-4"],
+                        "assumptions": ["A-4"], "issues": ["I-2"],
+                        "kept": ["K-2"]},
+    "ActivityDiagram.md": {"decisions": ["M-1", "M-2", "M-3", "M-6"],
+                           "assumptions": ["A-6"], "issues": [],
+                           "kept": []}
+  }
+}
